@@ -1,4 +1,6 @@
 #include "utils.h"
+
+
 // Imprime e le o prompt
 void prompt(char* comando, int size, char* repo_origim, History historico){
     
@@ -26,6 +28,7 @@ void guardar_comando(const char* comando, History historico){
 
     int indice = historico.size;
 
+        // Se o comando_aux for diferente de null, quer dizer que a funcao retornou
     if (indice == 10)
     {
         for (int i = 0; i < 9; i++){

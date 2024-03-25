@@ -5,7 +5,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <sys/types.h>
-// #include <sys/wait.h>
+#include <sys/wait.h>
 
 #define MAX_ALIAS 20
 #define MAX_SIZE_STR 100
