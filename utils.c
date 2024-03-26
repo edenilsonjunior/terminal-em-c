@@ -1,8 +1,7 @@
 #include "utils.h"
 
-
 // Imprime e le o prompt
-void prompt(char* comando, int size, char* repo_origim, History historico){
+void prompt(char* comando, int size, char* repo_origim, History* historico){
     
     time_t tempo_em_segundos = time(NULL);
     struct tm *data = localtime(&tempo_em_segundos);
@@ -24,60 +23,62 @@ void prompt(char* comando, int size, char* repo_origim, History historico){
 
 
 // Guarda o comando no historico
-void guardar_comando(const char* comando, History historico){
+void guardar_comando(char* comando, History* historico){
 
-    int indice = historico.size;
+    // Nao guarda o comando !n
+    if(strncmp(comando, "!", 1) == 0) return;
+    
+    int indice = historico->size;
 
         // Se o comando_aux for diferente de null, quer dizer que a funcao retornou
     if (indice == 10)
     {
         for (int i = 0; i < 9; i++){
-            strcpy(historico.comando[i],historico.comando[i + 1]);
+            strcpy(historico->comando[i],historico->comando[i + 1]);
         }
         indice--;
     }
 
-    strcpy(historico.comando[indice], comando);
+    strcpy(historico->comando[indice], comando);
     indice++;
 
-    historico.size = indice;
+    historico->size = indice;
 }
 
 
 // Metodo que lida com os comandos: exit, cd, history, alias
-char* lidar_internos(const char* comando, History historico, Alias_lista lista){
+char* lidar_internos(char* comando, History* historico, Alias_lista* lista){
 
     if (strcmp(comando, "exit") == 0){
         _exit(0);
-
     }
     else if(strncmp(comando, "cd ", 3) == 0){
         comando_cd(comando);
-
+        return NULL;
     }
     else if(strcmp(comando, "history") == 0){
         listar_comandos(historico);
-
+        return NULL;
     }
     else if(strncmp(comando, "alias ", 6) == 0){
         adicionar_alias(comando, lista);
-
+        return NULL;
     }
     else if(strncmp(comando, "!", 1) == 0){
         return comando_n(comando, historico);
     }
     else{
         // Se não for nenhum dos comandos internos, ele retorna caso o comando seja um alias
-        for (int i = 0; i < lista.size; i++)
+        for (int i = 0; i < lista->size; i++)
         {
-            if (strcmp(comando, lista.comandos[i].nome) == 0)
+            if (strcmp(comando, lista->comandos[i].nome) == 0)
             {
-                return lista.comandos[i].comando;
+                return lista->comandos[i].comando;
             }
         }
     }
 
-    return NULL;
+    return comando;
 }
 
 
@@ -99,19 +100,19 @@ void comando_cd(char* comando){
 
 
 // Mostra todos os comandos do historico
-void listar_comandos(History historico){
+void listar_comandos(History* historico){
 
-    for (int i = 0; i < historico.size; i++)
+    for (int i = 0; i < historico->size; i++)
     {
-        printf("%d %s\n", i, historico.comando[i]);
+        printf("%d %s\n", i, historico->comando[i]);
     }
 }
 
 
 // Adiciona um alias a lista
-void adicionar_alias(const char* comando, Alias_lista lista){
+void adicionar_alias(char* comando, Alias_lista* lista){
     
-    int tamanho = lista.size;
+    int tamanho = lista->size;
 
     if (tamanho >= MAX_ALIAS)
     {
@@ -146,20 +147,20 @@ void adicionar_alias(const char* comando, Alias_lista lista){
 
     tamanho++;
 
-    strcpy(lista.comandos[tamanho].nome, nome);
-    strcpy(lista.comandos[tamanho].comando, comando_alias);
+    strcpy(lista->comandos[tamanho].nome, nome);
+    strcpy(lista->comandos[tamanho].comando, comando_alias);
 
-    lista.size = tamanho;
+    lista->size = tamanho;
 }
 
 
 // Retorna o comando da posicao n dentro do historico
-char* comando_n(const char* comando, History historico){
+char* comando_n(char* comando, History* historico){
 
     int n = atoi(&comando[1]);
 
-    if (n >= 0 && n <= historico.size){
-        return historico.comando[n];
+    if (n >= 0 && n <= historico->size){
+        return historico->comando[n];
     }
 
     return NULL;
@@ -167,7 +168,7 @@ char* comando_n(const char* comando, History historico){
 
 
 // Executa o comando no filho
-void executar_comando(const char* texto){
+void executar_comando(char* texto){
 
     char* argumentos[MAX_SIZE_STR];
     int linha = 0;

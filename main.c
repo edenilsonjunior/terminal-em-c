@@ -2,16 +2,14 @@
 
 int main()
 {
-    // Lista de alias
+    char comando[MAX_SIZE_STR];
+
     Alias_lista lista;
     lista.size = 0;
 
-    // Historico de comandos
     History historico;
     historico.size = 0;
-    
-    // Comando do usuario
-    char comando[MAX_SIZE_STR];
+
 
     // Guarda o repositorio original
     char s[MAX_SIZE_STR]; 
@@ -19,25 +17,15 @@ int main()
 
     while (1)
     {
-        prompt(comando, sizeof(comando), repo_origim, historico);
+        prompt(comando, MAX_SIZE_STR, repo_origim, &historico);
 
-        /*
-            A funcao lidar_internos lida com as possibilidades de:
-            1-exit/2-cd/3-history/4-alias/5-!n
-            
-            Caso o usuario digite um comando que está na lista de alias, ele retorna o comando
-            Outra possibilidade de retorno é a função retornar o comando respectivo do !n
-        */  
-        char* comando_aux = lidar_internos(comando, historico, lista);
-
-        /*
-            Se o comando_aux for diferente de null, quer dizer que a funcao retornou
-            um comando do alias ou o respectivo comando do !n
-        */
-        if (comando_aux != NULL){
-            strcpy(comando, comando_aux);
-        }
-
+        // Se a funcao retornar NULL, quer dizer que o comando é um comando interno
+        char* comando_aux = lidar_internos(comando, &historico, &lista);
+        
+        if (comando_aux == NULL) continue;
+        
+        strcpy(comando, comando_aux);
+        
         pid_t pid = fork();
         if (pid < 0){
             perror("fork");
