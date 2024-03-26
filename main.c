@@ -21,7 +21,6 @@ int main()
 
         // Se a funcao retornar NULL, quer dizer que o comando é um comando interno
         char* comando_aux = lidar_internos(comando, &historico, &lista);
-        
         if (comando_aux == NULL) continue;
         
         strcpy(comando, comando_aux);

@@ -85,6 +85,7 @@ void comando_cd(char* comando){
     char diretorio[MAX_SIZE_STR];
     int indice_diretorio = 0;
 
+    // i comeca em 3 para pular o 'cd '
     for (size_t i = 3; i <= strlen(comando); i++)
     {
         diretorio[indice_diretorio] = comando[i];
@@ -119,8 +120,7 @@ void adicionar_alias(char* comando, Alias_lista* lista){
     
     int tamanho = lista->size;
 
-    if (tamanho >= MAX_ALIAS)
-    {
+    if (tamanho >= MAX_ALIAS){
         printf("Lista de alias cheia!");
         return;
     }
@@ -128,8 +128,11 @@ void adicionar_alias(char* comando, Alias_lista* lista){
     char nome[MAX_SIZE_STR];
     char comando_alias[MAX_SIZE_STR];
 
-    int total = 0;
+    // indice comeca em 6 para pular o 'alias '
     int indice = 6;
+    int total = 0;
+
+    // Esse primeiro loop ira copiar a bind do alias
     while (comando[indice] != '=')
     {
         nome[total] = comando[indice];
@@ -139,6 +142,7 @@ void adicionar_alias(char* comando, Alias_lista* lista){
     nome[total] = '\0';
 
 
+    // Esse segundo loop ira copiar o comando respectivo do alias
     total = 0;
     while (comando[indice] != '\0')
     {
@@ -184,7 +188,10 @@ void executar_comando(char* texto){
     int indice_original = 0;
     int indice_palavra = 0;
 
-    // Loop que irá percorrer todo o texto(comando)
+    /*
+        Loop que irá percorrer todo o texto(comando)
+        o loop irá dividir a string em posicoes do vetor de palavras
+    */
     while (texto[indice_original] != '\0') 
     {
         // se o texto for diferente de espaco
@@ -211,8 +218,10 @@ void executar_comando(char* texto){
         indice_original++;
     }
  
+    // Adiciona o '\0' no final da string
     argumentos[linha][indice_palavra] = '\0';
 
+    // O NULL é necessário para o execvp
     linha++;
     argumentos[linha] = NULL;
     
