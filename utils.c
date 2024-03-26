@@ -28,21 +28,19 @@ void guardar_comando(char* comando, History* historico){
     // Nao guarda o comando !n
     if(strncmp(comando, "!", 1) == 0) return;
     
-    int indice = historico->size;
+    int size = historico->size;
 
-        // Se o comando_aux for diferente de null, quer dizer que a funcao retornou
-    if (indice == 10)
-    {
+    if (size == 10){
         for (int i = 0; i < 9; i++){
-            strcpy(historico->comando[i],historico->comando[i + 1]);
+            strcpy(historico->comando[i], historico->comando[i + 1]);
         }
-        indice--;
+        size--;
     }
 
-    strcpy(historico->comando[indice], comando);
-    indice++;
+    strcpy(historico->comando[size], comando);
+    size++;
 
-    historico->size = indice;
+    historico->size = size;
 }
 
 
@@ -71,9 +69,9 @@ char* lidar_internos(char* comando, History* historico, Alias_lista* lista){
         // Se não for nenhum dos comandos internos, ele retorna caso o comando seja um alias
         for (int i = 0; i < lista->size; i++)
         {
-            if (strcmp(comando, lista->comandos[i].nome) == 0)
+            if (strcmp(comando, lista->comandos[i]->nome) == 0)
             {
-                return lista->comandos[i].comando;
+                return lista->comandos[i]->comando;
             }
         }
     }
@@ -95,12 +93,19 @@ void comando_cd(char* comando){
     
     diretorio[indice_diretorio] = '\0';
 
-    chdir(diretorio);
+    if (chdir(diretorio) == -1) {
+        perror("Erro ao executar o comando cd");
+    }
 }
 
 
 // Mostra todos os comandos do historico
 void listar_comandos(History* historico){
+
+    if (historico->size == 0){
+        printf("Historico vazio.\n");
+        return;
+    }
 
     for (int i = 0; i < historico->size; i++)
     {
@@ -135,21 +140,25 @@ void adicionar_alias(char* comando, Alias_lista* lista){
 
 
     total = 0;
-    while (comando[indice] != '\'')
+    while (comando[indice] != '\0')
     {
-        if (comando[indice] == '\''){
+        if (comando[indice] == '\'' || comando[indice] == '='){
             indice++;
         }else{
             comando_alias[total] = comando[indice];
             total++;
+            indice++;
         }
     }
+    comando_alias[total] = '\0';
 
-    tamanho++;
+    // Cria um novo alias e adiciona na lista
+    Alias *novo_alias = malloc(sizeof(Alias));
 
-    strcpy(lista->comandos[tamanho].nome, nome);
-    strcpy(lista->comandos[tamanho].comando, comando_alias);
+    strcpy(novo_alias->nome, nome);
+    strcpy(novo_alias->comando, comando_alias);
 
+    lista->comandos[tamanho++] = novo_alias;
     lista->size = tamanho;
 }
 
@@ -179,18 +188,21 @@ void executar_comando(char* texto){
     while (texto[indice_original] != '\0') 
     {
         // se o texto for diferente de espaco
-        if (texto[indice_original] != ' ') 
-        {
-            // se for o primeiro indice da palavra, ele aloca espaco, caso nao, ele apenas adiciona o caractere
-            if (indice_palavra == 0)
-            {
+        if (texto[indice_original] != ' ') {
+            
+            if (indice_palavra == 0){
                 argumentos[linha] = malloc(MAX_SIZE_STR * sizeof(char));
+
+                if (argumentos[linha] == NULL) {
+                    perror("Erro ao alocar memoria");
+                    exit(EXIT_FAILURE);
+                }
             }
+
             argumentos[linha][indice_palavra] = texto[indice_original];
             indice_palavra++;
         } 
-        else 
-        {
+        else {
             // Se entrou aqui é por que achou um ' ', nesse caso adiciona o '\0', muda a linha da matriz e reseta o indice da palavra
             argumentos[linha][indice_palavra] = '\0';
             linha++;
@@ -198,11 +210,9 @@ void executar_comando(char* texto){
         }
         indice_original++;
     }
-    
-    // adiciona o '\0' a ultima string
+ 
     argumentos[linha][indice_palavra] = '\0';
 
-    // para o execvp funcionar, a ultima string deve ser NULL
     linha++;
     argumentos[linha] = NULL;
     

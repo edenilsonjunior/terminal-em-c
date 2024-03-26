@@ -17,7 +17,7 @@ typedef struct struct_alias
 } Alias;
 
 typedef struct alias_lista {
-    Alias comandos[MAX_ALIAS];
+    Alias* comandos[MAX_ALIAS];
     int size;
 }Alias_lista;
 

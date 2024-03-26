@@ -25,7 +25,7 @@ int main()
         if (comando_aux == NULL) continue;
         
         strcpy(comando, comando_aux);
-        
+
         pid_t pid = fork();
         if (pid < 0){
             perror("fork");
